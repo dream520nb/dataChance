@@ -56,6 +56,16 @@ def readNii(file_path: str):
 
 
 def readPptx(file_path: str):
-    from pptx import Presentation
-    return Presentation(file_path)
+    '''
+    读取pptx格式的文件
+    '''
+    import comtypes.client as cl
+    file_path = os.path.abspath(file_path)
+    # 我记得这个好像必须要电脑中安装了 office 。 但是我的电脑已经安装了不能卸载了进行测试了。
+    readIO = cl.CreateObject('Powerpoint.Application')
+    readIO.Visible = 1
+    readIO.WindowState = 2  # 2 表示最小化
+    data = readIO.Presentations.Open(file_path)
+    readIO.Quit()
+    return data
     pass
