@@ -24,7 +24,7 @@ def BatchChanceData(input_dir: str, output_dir: str, mode: int | str, dir_keep: 
     # 判断输入值是否符合要求
     if not os.path.isdir(input_dir) or not os.path.isdir(output_dir):
         raise FileNotFoundError('输入路径或者输出路径有误')
-    modes = [1, 'nii2nii.gz', 2, 'webm2mp4',3,'pptx2pdf']
+    modes = [1, 'nii2nii.gz', 2, 'webm2mp4',3,'pptx2pdf',4,'mp42jpg']
     if mode not in modes:
         raise TabError('模式不存在')
     input_dir = str(Path(input_dir))
@@ -45,6 +45,12 @@ def BatchChanceData(input_dir: str, output_dir: str, mode: int | str, dir_keep: 
         case 3 | 'pptx2pdf' :
             input_type = '.pptx'
             output_type = '.pdf'
+        case 4 | 'mp42jpg':
+            input_type='.mp4'
+            output_type = '/'
+        
+
+        
 
     print('获取文件中')
     file_path_list = readDirToList(input_dir, input_type)
@@ -98,6 +104,9 @@ def _chanceData(input_file_path, output, mode):
                 chanceDate = __webm2mp4
             case 3 | 'pptx2pdf' :
                 chanceDate = __ppt2pdf
+            case 4 | 'mp42jpg' :
+                chanceDate = __mp42jpg
+
         # 转换
         chanceDate(input_file_path, output)
         print(f'{output}转换完成')
@@ -137,4 +146,42 @@ def __ppt2pdf(input_file_path, output):
     from .writeDataToFile import writePdf
     data = readPptx(input_file_path)
     writePdf(data,output)
+    pass
+
+def __mp42jpg(input_file_path, output):
+    '''
+    将mp4文件转化为jpg文件。
+    '''
+    import cv2
+    video_path = input_file_path
+    output_folder = output
+    # 打开视频文件
+    cap = cv2.VideoCapture(video_path)
+    # 检查视频是否成功打开
+    if not cap.isOpened():
+        print("Error: Could not open video.")
+        exit()
+    frame_count = 0
+    # 创建文件夹
+    if not os.path.isdir(output):
+        os.makedirs(output)
+
+    try:
+        while True:
+            # 读取一帧
+            ret, frame = cap.read()
+            if not ret:
+                break  # 读取结束
+
+            # 保存帧为JPG文件
+            frame_filename = os.path.join(output_folder, f'frame_{frame_count:04d}.jpg')
+            cv2.imwrite(frame_filename, frame)
+            frame_count += 1
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    # 释放视频对象
+    cap.release()
+    
     pass
