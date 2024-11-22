@@ -24,9 +24,6 @@ def BatchChanceData(input_dir: str, output_dir: str, mode: int | str, dir_keep: 
     # 判断输入值是否符合要求
     if not os.path.isdir(input_dir) or not os.path.isdir(output_dir):
         raise FileNotFoundError('输入路径或者输出路径有误')
-    modes = [1, 'nii2nii.gz', 2, 'webm2mp4',3,'pptx2pdf',4,'mp42jpg']
-    if mode not in modes:
-        raise TabError('模式不存在')
     input_dir = str(Path(input_dir))
     output_dir = str(Path(output_dir))
 
@@ -48,6 +45,11 @@ def BatchChanceData(input_dir: str, output_dir: str, mode: int | str, dir_keep: 
         case 4 | 'mp42jpg':
             input_type='.mp4'
             output_type = '/'
+        case 5 | 'mp42avi':
+            input_type='.mp4'
+            output_type='.avi'
+        case _:
+            raise ValueError('模式不存在')
         
 
         
@@ -106,6 +108,9 @@ def _chanceData(input_file_path, output, mode):
                 chanceDate = __ppt2pdf
             case 4 | 'mp42jpg' :
                 chanceDate = __mp42jpg
+            case 5 | 'mp42avi':
+                chanceDate = __mp42avi
+                pass
 
         # 转换
         chanceDate(input_file_path, output)
@@ -114,6 +119,23 @@ def _chanceData(input_file_path, output, mode):
         print(e)
     pass
 
+def __mp42avi(input_file_path,output):
+    import subprocess
+    # 创建ffmpeg命令
+    command = [
+        'ffmpeg',  # ffmpeg 命令
+        '-i', input_file_path,  # 输入文件路径
+        output # 输出文件路径
+    ]
+
+    # 调用 ffmpeg 执行转换
+    try:
+        subprocess.run(command, check=True)
+        print(f"Conversion successful! Output saved to {output}")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+    
+    pass
 
 def __nii2niigz(input_file_path, output):
     '''
